@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.example.hql.dao.AddressDao;
@@ -54,6 +55,9 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @Transactional
     public void update(Address address) {
+        System.out.println("inside");
+        System.out.println(address.getResidents());
+        System.out.println();
         addressDao.update(address);
     }
 

@@ -1,10 +1,13 @@
 package com.example.hql.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import com.example.hql.model.Address;
 import com.example.hql.model.Employee;
 import com.example.hql.model.Phone;
 import com.example.hql.model.dto.PhoneDto;
@@ -26,6 +29,9 @@ public class EmployeeServiceImpl implements EmployeeService{
     private PhoneDao phoneDao;
     @Autowired
 	private PhoneService phoneService;
+    @Autowired
+    @Lazy
+	private AddressService addressService;
 	@Autowired
 	private PhoneMapperImpl phoneMapper;
 
@@ -50,6 +56,21 @@ public class EmployeeServiceImpl implements EmployeeService{
     @Override
     @Transactional
     public void save(Employee employee) {
+        List<Address> existingAddresses = new ArrayList<>();
+        if (employee.getAddresses() != null) {
+            List<Address> addresses = employee.getAddresses();
+            for (int i = 0; i < addresses.size(); i++) {
+                Address address = addresses.get(i);
+                if(address.getId() != null && addressService.get(address.getId()) != null){
+                    existingAddresses.add(address);
+                    employee.getAddresses().remove(address);
+                }
+            }
+        }
+        
+        System.out.println(existingAddresses);
+        System.out.println(employee.getAddresses());
+        
         employeeDao.save(employee);
         if (employee.getPhones()!= null) {
             for (Phone phone : employee.getPhones()) {
@@ -58,6 +79,12 @@ public class EmployeeServiceImpl implements EmployeeService{
 				phoneService.save(phone);
             }
         }
+        if(existingAddresses != null){
+            employee.getAddresses().add(existingAddresses.get(0));
+            System.out.println(employee.getAddresses());
+            employeeDao.update(employee);
+        }
+        
     }
 
     @Override
